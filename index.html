@@ -297,6 +297,7 @@ tapNote:['Recent notes','সাম্প্রতিক নোট'],hideBal:['Hi
 install:['Install app on this phone','এই ফোনে অ্যাপ ইনস্টল করুন'],installBtn:['Install','ইনস্টল'],
 installHelp:['Android Chrome: menu ⋮ → Install app (or Add to Home screen). iPhone Safari: Share → Add to Home Screen. If it says "already installed", open it from your app list, or uninstall the old copy first.','Android Chrome: মেনু ⋮ → Install app (বা Add to Home screen)। iPhone Safari: Share → Add to Home Screen। "already installed" দেখালে অ্যাপ লিস্ট থেকে খুলুন, অথবা আগে পুরোনোটা আনইনস্টল করুন।'],
 installed:['Installed on this phone ✓','এই ফোনে ইনস্টল করা আছে ✓'],
+persist:['Protected storage','সুরক্ষিত স্টোরেজ'],persistYes:['ON (the browser will not clear it automatically)','চালু (ব্রাউজার নিজে থেকে মুছবে না)'],persistNo:['Not guaranteed. Keep a recent backup.','নিশ্চিত নয়। সাম্প্রতিক ব্যাকআপ রাখুন।'],
 catAll:['All categories','সব ক্যাটাগরি'],walAll:['All wallets','সব ওয়ালেট']
 };
 const t=k=>D[k]?D[k][S.settings.lang==='bn'?1:0]:k;
@@ -674,7 +675,7 @@ function vMore(){
    <div class="card"><div class="row"><h3 class="sp">${t('wallets')}</h3><button class="btn sm g" type="button" data-a="addwallet">+ ${t('add')}</button></div><div class="list">${S.wallets.map(w=>`<div class="it" data-a="editwallet" data-id="${w.id}"><div class="ic">${esc(w.n||'👛')}</div><div class="m"><b>${esc(w.name)}</b></div><div class="a">${money(walletBal(w))}</div></div>`).join('')}</div></div>
    <div class="card"><div class="row"><h3 class="sp">${t('categories')}</h3><button class="btn sm g" type="button" data-a="addcat">+ ${t('add')}</button></div>
     ${['e','i'].map(ty=>`<div class="mut" style="margin:8px 0 4px;font-weight:700">${t(ty==='e'?'expense':'income')}</div><div class="chips" style="flex-wrap:wrap">${S.cats.filter(c=>!c.s&&c.type===ty).map(c=>`<button class="chip" type="button" data-a="editcat" data-id="${c.id}">${esc(c.icon+' '+catName(c))}</button>`).join('')}</div>`).join('')}</div>
-   <div class="card"><h3>💾 ${t('backup')}</h3><div class="mut">${t('lastBackup')}: ${esc(lb)}</div><div class="row wrap" style="margin-top:8px"><button class="btn g sm" type="button" data-a="dlbackup">${t('dlBackup')}</button>${navigator.share?`<button class="btn s sm" type="button" data-a="sharebackup">${t('shareBackup')}</button>`:''}<label class="btn s sm" style="display:inline-block">${t('restore')}<input type="file" id="restoreFile" accept=".json,application/json" hidden></label></div><div class="mut" style="margin-top:8px">${t('backupHelp')}</div></div>
+   <div class="card"><h3>💾 ${t('backup')}</h3><div class="mut">${t('lastBackup')}: ${esc(lb)}</div><div class="mut">${t('persist')}: ${U.persisted===true?t('persistYes'):t('persistNo')}</div><div class="row wrap" style="margin-top:8px"><button class="btn g sm" type="button" data-a="dlbackup">${t('dlBackup')}</button>${navigator.share?`<button class="btn s sm" type="button" data-a="sharebackup">${t('shareBackup')}</button>`:''}<label class="btn s sm" style="display:inline-block">${t('restore')}<input type="file" id="restoreFile" accept=".json,application/json" hidden></label></div><div class="mut" style="margin-top:8px">${t('backupHelp')}</div></div>
    <div class="card"><div class="mut">${t('help')}</div><div class="row" style="margin-top:10px"><button class="btn r sm" type="button" data-a="erase">${t('erase')}</button></div></div>`;
 }
 function genRecurring(){
@@ -950,6 +951,7 @@ function afterUnlock(){
   if(!S.settings.onboarded){S.settings.onboarded=true;save();onboard()}
 }
 if(S.tx.length)S.settings.onboarded=true;
+try{if(navigator.storage&&navigator.storage.persisted){navigator.storage.persisted().then(p=>p||navigator.storage.persist()).then(p=>{U.persisted=!!p;if(U.tab==='more')render()}).catch(()=>{})}}catch(e){}
 const nrec=genRecurring();
 render();
 if(S.settings.pin)showLock();else afterUnlock();

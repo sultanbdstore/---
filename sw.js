@@ -1,5 +1,5 @@
 /* Offline cache: serves the app when there is no internet. Bump VERSION after editing index.html. */
-const VERSION='ie-v3';
+const VERSION='ie-v4';
 const FILES=['./','./index.html','./manifest.webmanifest','./icons/logo-192.png','./icons/logo-512.png','./icons/apple-touch-icon.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(VERSION).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==VERSION).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
