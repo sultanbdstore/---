@@ -294,6 +294,9 @@ recurring:['Recurring (auto)','নিয়মিত লেনদেন (অট�
 recHelp:['Added automatically when the date comes, the next time you open the app. Good for rent, salary and bills.','তারিখ এলে অ্যাপ খুললে নিজে থেকে যোগ হবে। বাসা ভাড়া, বেতন, বিলের জন্য ভালো।'],recAdded:['recurring entries added','টি নিয়মিত লেনদেন যোগ হয়েছে'],noRec:['No recurring entries yet.','এখনো কোনো নিয়মিত লেনদেন নেই।'],everyMonth:['Every month, day','প্রতি মাসের'],needDay:['Enter a day between 1 and 31.','১ থেকে ৩১ এর মধ্যে তারিখ দিন।'],
 welcome:['Welcome! 👋','স্বাগতম! 👋'],welcomeSub:['How much money is in each wallet right now? Enter it below (skip if unsure, you can change it later).','এখন কোন ওয়ালেটে কত টাকা আছে? নিচে লিখুন (না জানলে বাদ দিন, পরে বদলানো যাবে)।'],start:['Start','শুরু করুন'],
 tapNote:['Recent notes','সাম্প্রতিক নোট'],hideBal:['Hide / show balance','ব্যালেন্স লুকান / দেখান'],
+install:['Install app on this phone','এই ফোনে অ্যাপ ইনস্টল করুন'],installBtn:['Install','ইনস্টল'],
+installHelp:['Android Chrome: menu ⋮ → Install app (or Add to Home screen). iPhone Safari: Share → Add to Home Screen. If it says "already installed", open it from your app list, or uninstall the old copy first.','Android Chrome: মেনু ⋮ → Install app (বা Add to Home screen)। iPhone Safari: Share → Add to Home Screen। "already installed" দেখালে অ্যাপ লিস্ট থেকে খুলুন, অথবা আগে পুরোনোটা আনইনস্টল করুন।'],
+installed:['Installed on this phone ✓','এই ফোনে ইনস্টল করা আছে ✓'],
 catAll:['All categories','সব ক্যাটাগরি'],walAll:['All wallets','সব ওয়ালেট']
 };
 const t=k=>D[k]?D[k][S.settings.lang==='bn'?1:0]:k;
@@ -650,9 +653,17 @@ function vReports(){
 }
 
 /* ================= More / settings ================= */
+let deferredInstall=null;
+const isStandalone=()=>window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;if(U.tab==='more')render()});
+window.addEventListener('appinstalled',()=>{deferredInstall=null;toast(t('installed'));if(U.tab==='more')render()});
+function installCard(){
+  if(isStandalone())return`<div class="card"><div class="mut">${t('installed')}</div></div>`;
+  return`<div class="card"><h3>📲 ${t('install')}</h3>${deferredInstall?`<button class="btn g" type="button" data-a="install">${t('installBtn')}</button>`:''}<div class="mut" style="margin-top:8px">${t('installHelp')}</div></div>`;
+}
 function vMore(){
   const s=S.settings,lb=s.lastBackup?new Date(s.lastBackup).toLocaleString(li()?'bn-BD-u-nu-'+(s.bnDigits?'beng':'latn'):'en-GB'):t('never');
-  return`<div class="card"><h3>${t('settings')}</h3>
+  return installCard()+`<div class="card"><h3>${t('settings')}</h3>
    <label class="f">${t('language')}</label><div class="chips"><button class="chip ${s.lang==='bn'?'on':''}" type="button" data-a="lang" data-v="bn">বাংলা</button><button class="chip ${s.lang==='en'?'on':''}" type="button" data-a="lang" data-v="en">English</button></div>
    <label class="f">${t('digits')}</label><div class="chips"><button class="chip ${s.bnDigits?'on':''}" type="button" data-a="digits" data-v="1">০১২৩</button><button class="chip ${!s.bnDigits?'on':''}" type="button" data-a="digits" data-v="0">0123</button></div>
    <label class="f">${t('currency')}</label><input type="text" id="cur" maxlength="6" value="${esc(s.cur)}" style="max-width:120px">
@@ -870,6 +881,7 @@ const A={
  edittx:e=>openTx(e.dataset.id),
  ttype:e=>{syncTf();U.tf.t=e.dataset.v;U.tf.c='';txSheet()},
  key:e=>pressKey(e.dataset.v),
+ install:async()=>{if(!deferredInstall)return;deferredInstall.prompt();try{await deferredInstall.userChoice}catch(e){}deferredInstall=null;render()},
  sugnote:e=>{$('#f_note').value=e.dataset.v},
  quick:e=>openTx(null,{c:e.dataset.id}),quickinc:()=>openTx(null,{t:'i'}),
  eye:()=>{S.settings.hide=!S.settings.hide;save();render()},

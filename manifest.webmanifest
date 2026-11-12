@@ -1,4 +1,5 @@
 {
+  "id": "/income-expense-app",
   "name": "আয়-ব্যয় হিসাব | Income & Expense",
   "short_name": "আয়-ব্যয়",
   "description": "Offline income and expense tracker with wallets, budgets, debts and reports.",
